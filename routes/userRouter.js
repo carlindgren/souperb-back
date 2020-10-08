@@ -52,8 +52,6 @@ router.post('/register', async (req, res) => {
 
     const savedUser = await newUser.save();
     res.json(savedUser);
-
-    console.log(passwordHash);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -62,7 +60,7 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log(req.body);
+
     //validate
     if (!email || !password) {
       return res
@@ -81,7 +79,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ msg: 'invalid login credentials' });
     }
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-    console.log(token);
+
     res.json({
       token,
       user: {
@@ -97,8 +95,6 @@ router.post('/login', async (req, res) => {
 });
 
 router.delete('/delete', auth, async (req, res) => {
-  console.log(req.user);
-
   try {
     const deletedUser = await User.findByIdAndDelete(req.user);
     res.json(deletedUser);
@@ -112,9 +108,22 @@ router.post('/addSoup', auth, async (req, res) => {
   //add soupID in the soups array.
   const { soupID, userID } = req.body;
   let newSoup = { soup: soupID };
-  console.log(soupID + 'soupid');
+
   try {
     await User.findByIdAndUpdate({ _id: userID }, { $push: newSoup });
+  } catch (err) {
+    res.json({ msg: err.message });
+  }
+});
+
+router.post('/addPreferedPayment', auth, async (req, res) => {
+  try {
+    const { preferedPayment, id } = req.body;
+    await User.findByIdAndUpdate(
+      { _id: id },
+      { preferedPayment: preferedPayment }
+    );
+    return res.json(true);
   } catch (err) {
     res.json({ msg: err.message });
   }

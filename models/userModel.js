@@ -8,7 +8,14 @@ const userSchema = new mongoose.Schema({
   phoneNumber: { type: Number },
   soup: [String],
   bread: [String],
-  drinks: [String]
+  drinks: [String],
+  preferedPayment: { type: String },
+  Adress: {
+    street: { type: String },
+    ZipCode: {},
+    portCode: { type: Number },
+    floor: { type: Number }
+  }
 });
 
 module.exports = mongoose.model('User', userSchema);
