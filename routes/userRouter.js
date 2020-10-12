@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const auth = require('../middleware/auth');
 const User = require('../models/userModel');
+const Cart = require('../models/cartModel');
 
 router.get('/getall', async (req, res) => {
   const users = await User.find({});
@@ -111,6 +112,7 @@ router.post('/addSoup', auth, async (req, res) => {
 
   try {
     await User.findByIdAndUpdate({ _id: userID }, { $push: newSoup });
+    return res.json(true);
   } catch (err) {
     res.json({ msg: err.message });
   }
@@ -132,11 +134,13 @@ router.post('/addPreferedPayment', auth, async (req, res) => {
 router.post('/addDrinks', auth, async (req, res) => {
   try {
     const { userID, drinksArray } = req.body;
-
-    await User.findByIdAndUpdate(
-      { _id: userID },
-      { $push: { drinks: drinksArray } }
-    );
+    console.log(drinksArray);
+    if (drinksArray) {
+      await User.findByIdAndUpdate(
+        { _id: userID },
+        { $push: { drinks: drinksArray } }
+      );
+    }
     return res.json(true);
   } catch (err) {
     res.json({ msg: err.message });
@@ -172,6 +176,66 @@ router.post('/tokenIsValid', async (req, res) => {
     return res.json(true);
   } catch (err) {
     res.status(500).json({ msg: err.message });
+  }
+});
+
+router.delete('/deleteCart', auth, async (req, res) => {
+  const { userId } = req.body;
+  try {
+    const deleted = await Cart.findOneAndDelete({ userId });
+    s;
+    return res.json(true);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ msg: err.message });
+  }
+});
+
+router.post('/cart', auth, async (req, res) => {
+  const { userId, productId, quantity, name, price, typeOfProd } = req.body;
+  //const userId = '5de7ffa74fff640a0491bc4f'; //TODO: the logged in user id
+
+  try {
+    let cart = await Cart.findOne({ userId });
+
+    if (cart) {
+      //cart exists for user
+      let itemIndex = cart.products.findIndex((p) => p.productId == productId);
+
+      if (itemIndex > -1) {
+        //product exists in the cart, update the quantity
+        let productItem = cart.products[itemIndex];
+        productItem.quantity = quantity + 1;
+        cart.products[itemIndex] = productItem;
+      } else {
+        //product does not exists in cart, add new item
+        cart.products.push({ productId, quantity, name, price, typeOfProd });
+      }
+      cart = await cart.save();
+      return res.status(201).send(cart);
+    } else {
+      //no cart for user, create new cart
+      const newCart = await Cart.create({
+        userId,
+        products: [{ productId, quantity, name, price, typeOfProd }]
+      });
+
+      return res.status(201).send(newCart);
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).send(err.message);
+  }
+});
+
+router.get('/getCart', auth, async (req, res) => {
+  const { userId } = req.body;
+  try {
+    const cart = await Cart.findOne({ userId });
+    console.log(cart);
+    res.json({ cart });
+  } catch (err) {
+    res.json({ err });
   }
 });
 
