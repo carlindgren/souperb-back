@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Cart = require('./cartModel');
+
 //think this through
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },

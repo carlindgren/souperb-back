@@ -182,7 +182,6 @@ router.delete('/deleteCart', auth, async (req, res) => {
   const { userId } = req.body;
   try {
     const deleted = await Cart.findOneAndDelete({ userId });
-    s;
     return res.json(true);
   } catch (err) {
     console.log(err);
@@ -264,9 +263,10 @@ router.post('/cart', auth, async (req, res) => {
 });
 
 router.get('/getCart', auth, async (req, res) => {
-  const { userId } = req.body;
+  const user = await User.findById(req.user);
+  const { _id: userId } = user;
   try {
-    const cart = await Cart.findOne({ userId });
+    let cart = await Cart.find({ userId });
     res.json({ cart });
   } catch (err) {
     res.json({ err });
