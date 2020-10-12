@@ -134,7 +134,6 @@ router.post('/addPreferedPayment', auth, async (req, res) => {
 router.post('/addDrinks', auth, async (req, res) => {
   try {
     const { userID, drinksArray } = req.body;
-    console.log(drinksArray);
     if (drinksArray) {
       await User.findByIdAndUpdate(
         { _id: userID },
@@ -191,6 +190,42 @@ router.delete('/deleteCart', auth, async (req, res) => {
   }
 });
 
+router.post('/removeFromCart', auth, async (req, res) => {
+  const { userId, productId, quantity, name, price, typeOfProd } = req.body;
+  //const userId = '5de7ffa74fff640a0491bc4f'; //TODO: the logged in user id
+
+  try {
+    let cart = await Cart.findOne({ userId });
+
+    if (cart) {
+      //cart exists for user
+      let itemIndex = cart.products.findIndex((p) => p.productId == productId);
+
+      if (itemIndex > -1) {
+        //product exists in the cart, update the quantity
+        let productItem = cart.products[itemIndex];
+        productItem.quantity = quantity;
+        cart.products[itemIndex] = productItem;
+      } else {
+        //product does not exists in cart, add new item
+        cart.products.push({ productId, quantity, name, price, typeOfProd });
+      }
+      cart = await cart.save();
+      return res.status(201).send(cart);
+    } else {
+      //no cart for user, create new cart
+      const newCart = await Cart.create({
+        userId,
+        products: [{ productId, quantity, name, price, typeOfProd }]
+      });
+
+      return res.status(201).send(newCart);
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).send(err.message);
+  }
+});
 router.post('/cart', auth, async (req, res) => {
   const { userId, productId, quantity, name, price, typeOfProd } = req.body;
   //const userId = '5de7ffa74fff640a0491bc4f'; //TODO: the logged in user id
@@ -205,7 +240,7 @@ router.post('/cart', auth, async (req, res) => {
       if (itemIndex > -1) {
         //product exists in the cart, update the quantity
         let productItem = cart.products[itemIndex];
-        productItem.quantity = quantity + 1;
+        productItem.quantity = quantity;
         cart.products[itemIndex] = productItem;
       } else {
         //product does not exists in cart, add new item
@@ -232,7 +267,6 @@ router.get('/getCart', auth, async (req, res) => {
   const { userId } = req.body;
   try {
     const cart = await Cart.findOne({ userId });
-    console.log(cart);
     res.json({ cart });
   } catch (err) {
     res.json({ err });
