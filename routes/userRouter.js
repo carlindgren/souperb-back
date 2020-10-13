@@ -188,11 +188,34 @@ router.delete('/deleteCart', auth, async (req, res) => {
     res.status(500).json({ msg: err.message });
   }
 });
+router.post('/deleteCartItem', auth, async (req, res) => {
+  const { userId, productId } = req.body;
+  console.log(productId);
+  console.log('prod id');
+  try {
+    const cart = await Cart.find({ userId });
+    //got cart
+    let newProds = cart[0].products.filter(
+      (elem) => elem.productId !== productId
+    );
+    //cart[0].products = newCart;
+    await Cart.remove({ userId });
+
+    const newCart = await Cart.create({
+      userId,
+      products: newProds
+    });
+    newCart.save();
+    res.json({ cart });
+  } catch (err) {
+    console.log(err);
+  }
+});
 
 router.post('/removeFromCart', auth, async (req, res) => {
   const { userId, productId, quantity, name, price, typeOfProd } = req.body;
   //const userId = '5de7ffa74fff640a0491bc4f'; //TODO: the logged in user id
-
+  console.log(quantity);
   try {
     let cart = await Cart.findOne({ userId });
 
@@ -203,7 +226,8 @@ router.post('/removeFromCart', auth, async (req, res) => {
       if (itemIndex > -1) {
         //product exists in the cart, update the quantity
         let productItem = cart.products[itemIndex];
-        productItem.quantity = quantity;
+        productItem.quantity -= quantity;
+
         cart.products[itemIndex] = productItem;
       } else {
         //product does not exists in cart, add new item
@@ -239,7 +263,7 @@ router.post('/cart', auth, async (req, res) => {
       if (itemIndex > -1) {
         //product exists in the cart, update the quantity
         let productItem = cart.products[itemIndex];
-        productItem.quantity = quantity;
+        productItem.quantity += quantity;
         cart.products[itemIndex] = productItem;
       } else {
         //product does not exists in cart, add new item
