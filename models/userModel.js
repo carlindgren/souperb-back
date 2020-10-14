@@ -15,7 +15,8 @@ const userSchema = new mongoose.Schema({
     ZipCode: {},
     portCode: { type: Number },
     floor: { type: Number }
-  }
+  },
+  discount: { type: Boolean, default: false }
 });
 
 module.exports = mongoose.model('User', userSchema);
