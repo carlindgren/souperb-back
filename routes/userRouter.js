@@ -104,53 +104,12 @@ router.delete('/delete', auth, async (req, res) => {
   }
 });
 
-//add soup to database
-router.post('/addSoup', auth, async (req, res) => {
-  //add soupID in the soups array.
-  const { soupID, userID } = req.body;
-  let newSoup = { soup: soupID };
-
-  try {
-    await User.findByIdAndUpdate({ _id: userID }, { $push: newSoup });
-    return res.json(true);
-  } catch (err) {
-    res.json({ msg: err.message });
-  }
-});
-
 router.post('/addPreferedPayment', auth, async (req, res) => {
   try {
     const { preferedPayment, id } = req.body;
     await User.findByIdAndUpdate(
       { _id: id },
       { preferedPayment: preferedPayment }
-    );
-    return res.json(true);
-  } catch (err) {
-    res.json({ msg: err.message });
-  }
-});
-
-router.post('/addDrinks', auth, async (req, res) => {
-  try {
-    const { userID, drinksArray } = req.body;
-    if (drinksArray) {
-      await User.findByIdAndUpdate(
-        { _id: userID },
-        { $push: { drinks: drinksArray } }
-      );
-    }
-    return res.json(true);
-  } catch (err) {
-    res.json({ msg: err.message });
-  }
-});
-router.post('/addBread', auth, async (req, res) => {
-  try {
-    const { userID, breadArray } = req.body;
-    await User.findByIdAndUpdate(
-      { _id: userID },
-      { $push: { bread: breadArray } }
     );
     return res.json(true);
   } catch (err) {
@@ -190,8 +149,7 @@ router.delete('/deleteCart', auth, async (req, res) => {
 });
 router.post('/deleteCartItem', auth, async (req, res) => {
   const { userId, productId } = req.body;
-  console.log(productId);
-  console.log('prod id');
+
   try {
     const cart = await Cart.find({ userId });
     //got cart
@@ -208,14 +166,12 @@ router.post('/deleteCartItem', auth, async (req, res) => {
     newCart.save();
     res.json({ cart });
   } catch (err) {
-    console.log(err);
+    res.json({ msg: err.message });
   }
 });
 
 router.post('/removeFromCart', auth, async (req, res) => {
   const { userId, productId, quantity, name, price, typeOfProd } = req.body;
-  //const userId = '5de7ffa74fff640a0491bc4f'; //TODO: the logged in user id
-  console.log(quantity);
   try {
     let cart = await Cart.findOne({ userId });
 
