@@ -116,6 +116,26 @@ router.post('/addPreferedPayment', auth, async (req, res) => {
     res.json({ msg: err.message });
   }
 });
+router.post('/addAdressDetails', auth, async (req, res) => {
+  try {
+    const { userId, name, street, zipCode, portCode, floor } = req.body;
+    const adress = {
+      name,
+      street,
+      zipCode,
+      portCode,
+      floor
+    };
+    await User.findByIdAndUpdate(
+      { _id: userId },
+      {
+        adress
+      }
+    );
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
+});
 
 router.post('/tokenIsValid', async (req, res) => {
   try {

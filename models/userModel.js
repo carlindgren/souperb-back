@@ -6,14 +6,12 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true, minlength: 5 },
   displayName: { type: String }, //optional for rendering when logged in.
   phoneNumber: { type: Number },
-  soup: [String],
-  bread: [String],
-  drinks: [String],
   preferedPayment: { type: String },
-  Adress: {
-    street: { type: String },
-    ZipCode: {},
-    portCode: { type: Number },
+  adress: {
+    name: { type: String },
+    street: {},
+    zipCode: {},
+    portCode: {},
     floor: { type: Number }
   },
   discount: { type: Boolean, default: false }
