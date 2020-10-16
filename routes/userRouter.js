@@ -132,6 +132,7 @@ router.post('/addAdressDetails', auth, async (req, res) => {
         adress
       }
     );
+    return res.json(true);
   } catch (err) {
     res.status(500).json({ msg: err.message });
   }
