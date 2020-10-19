@@ -26,6 +26,21 @@ router.get('/getCart', auth, async (req, res) => {
   }
 });
 
+//getting orderinformation for profile page in frontend. what to display?
+router.get('/getOrderInformation', auth, async (req, res) => {
+  const user = await User.findById(req.user);
+  const { _id: userId } = user;
+  try {
+    let order = await order.find({ userId });
+    if (order) {
+      return res.status(200).json({ order });
+    }
+    return res.json({ msg: 'no orderDetails for this account' });
+  } catch (err) {
+    res.json({ err });
+  }
+});
+
 router.get('/getUserInformation', auth, async (req, res) => {
   const user = await User.findById(req.user);
   res.json({ user });
@@ -39,6 +54,7 @@ router.get('/', auth, async (req, res) => {
 });
 
 //post
+
 router.post('/register', async (req, res) => {
   //should be in the post req.body so destructrure.
   try {
@@ -230,6 +246,25 @@ router.post('/removeFromCart', auth, async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).send({ msg: err.message });
+  }
+});
+
+router.post('/order', async (req, res) => {
+  const { userId, orderType, orderTime, orderPrice } = req.body;
+
+  try {
+    //order does not exist.
+    //create one.
+    //no cart for user, create new cart
+    await Cart.create({
+      userId,
+      orderTime,
+      orderType,
+      orderPrice
+    });
+    return res.json({ order });
+  } catch (err) {
+    res.json({ err });
   }
 });
 router.post('/cart', auth, async (req, res) => {
