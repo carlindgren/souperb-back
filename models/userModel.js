@@ -14,7 +14,8 @@ const userSchema = new mongoose.Schema({
     portCode: {},
     floor: { type: Number }
   },
-  discount: { type: Boolean, default: false }
+  discount: { type: Boolean, default: false },
+  boughtSoups: { type: Number, default: 0 }
 });
 
 module.exports = mongoose.model('User', userSchema);

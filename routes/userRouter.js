@@ -5,6 +5,7 @@ const auth = require('../middleware/auth');
 const User = require('../models/userModel');
 const Cart = require('../models/cartModel');
 
+// get
 router.get('/getall', async (req, res) => {
   const users = await User.find({});
   if (!users) {
@@ -13,6 +14,31 @@ router.get('/getall', async (req, res) => {
   res.json(users);
 });
 
+router.get('/getCart', auth, async (req, res) => {
+  const user = await User.findById(req.user);
+  const { _id: userId } = user;
+  try {
+    let cart = await Cart.find({ userId });
+    res.json({ cart });
+    return res.json(true);
+  } catch (err) {
+    res.json({ err });
+  }
+});
+
+router.get('/getUserInformation', auth, async (req, res) => {
+  const user = await User.findById(req.user);
+  res.json({ user });
+});
+router.get('/', auth, async (req, res) => {
+  const user = await User.findById(req.user);
+  res.json({
+    displayName: user.displayName,
+    id: user._id
+  });
+});
+
+//post
 router.post('/register', async (req, res) => {
   //should be in the post req.body so destructrure.
   try {
@@ -95,15 +121,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.delete('/delete', auth, async (req, res) => {
-  try {
-    const deletedUser = await User.findByIdAndDelete(req.user);
-    res.json(deletedUser);
-  } catch (err) {
-    res.status(400).json({ msg: err.message });
-  }
-});
-
 router.post('/addPreferedPayment', auth, async (req, res) => {
   try {
     const { preferedPayment, id } = req.body;
@@ -154,17 +171,6 @@ router.post('/tokenIsValid', async (req, res) => {
     }
     return res.json(true);
   } catch (err) {
-    res.status(500).json({ msg: err.message });
-  }
-});
-
-router.delete('/deleteCart', auth, async (req, res) => {
-  const { userId } = req.body;
-  try {
-    const deleted = await Cart.findOneAndDelete({ userId });
-    return res.json(true);
-  } catch (err) {
-    console.log(err);
     res.status(500).json({ msg: err.message });
   }
 });
@@ -223,14 +229,13 @@ router.post('/removeFromCart', auth, async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    res.status(500).send(err.message);
+    res.status(500).send({ msg: err.message });
   }
 });
 router.post('/cart', auth, async (req, res) => {
-  const { userId, productId, quantity, name, price, typeOfProd } = req.body;
-  //const userId = '5de7ffa74fff640a0491bc4f'; //TODO: the logged in user id
-
   try {
+    const { userId, productId, quantity, name, price, typeOfProd } = req.body;
+
     let cart = await Cart.findOne({ userId });
 
     if (cart) {
@@ -259,30 +264,27 @@ router.post('/cart', auth, async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    res.status(500).send(err.message);
+    res.status(500).send({ msg: err.message });
   }
 });
 
-router.get('/getCart', auth, async (req, res) => {
-  const user = await User.findById(req.user);
-  const { _id: userId } = user;
+//delc
+router.delete('/deleteCart', auth, async (req, res) => {
+  const { userId } = req.body;
   try {
-    let cart = await Cart.find({ userId });
-    res.json({ cart });
+    const deleted = await Cart.findOneAndDelete({ userId });
+    return res.json(true);
   } catch (err) {
-    res.json({ err });
+    console.log(err);
+    res.status(500).json({ msg: err.message });
   }
 });
-
-router.get('/getUserInformation', auth, async (req, res) => {
-  const user = await User.findById(req.user);
-  res.json({ user });
-});
-router.get('/', auth, async (req, res) => {
-  const user = await User.findById(req.user);
-  res.json({
-    displayName: user.displayName,
-    id: user._id
-  });
+router.delete('/delete', auth, async (req, res) => {
+  try {
+    const deletedUser = await User.findByIdAndDelete(req.user);
+    res.json(deletedUser);
+  } catch (err) {
+    res.status(400).json({ msg: err.message });
+  }
 });
 module.exports = router;
