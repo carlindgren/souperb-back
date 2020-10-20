@@ -253,7 +253,7 @@ router.post('/removeFromCart', auth, async (req, res) => {
 
 router.post('/order', async (req, res) => {
   const { userId, orderType, orderTime, orderPrice } = req.body;
-  console.log(userId, orderType, orderTime, orderPrice);
+
   try {
     await Order.create({
       userId,
