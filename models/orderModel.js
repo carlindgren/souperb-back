@@ -7,7 +7,8 @@ const orderSchema = new mongoose.Schema({
   },
   orderType: { type: String },
   orderTime: { type: String },
-  orderPrice: { type: String }
+  orderPrice: { type: String },
+  orderNo: { type: Number }
 });
 
 module.exports = mongoose.model('Order', orderSchema);

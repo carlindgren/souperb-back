@@ -4,7 +4,8 @@ const jwt = require('jsonwebtoken');
 const auth = require('../middleware/auth');
 const User = require('../models/userModel');
 const Cart = require('../models/cartModel');
-
+const Order = require('../models/orderModel');
+const { findById } = require('../models/userModel');
 // get
 router.get('/getall', async (req, res) => {
   const users = await User.find({});
@@ -31,9 +32,10 @@ router.get('/getOrderInformation', auth, async (req, res) => {
   const user = await User.findById(req.user);
   const { _id: userId } = user;
   try {
-    let order = await order.find({ userId });
+    let order = await Order.find({ userId });
     if (order) {
-      return res.status(200).json({ order });
+      res.json({ order });
+      return res.json(true);
     }
     return res.json({ msg: 'no orderDetails for this account' });
   } catch (err) {
@@ -251,17 +253,22 @@ router.post('/removeFromCart', auth, async (req, res) => {
 
 router.post('/order', async (req, res) => {
   const { userId, orderType, orderTime, orderPrice } = req.body;
-
+  console.log(userId, orderType, orderTime, orderPrice);
   try {
-    //order does not exist.
-    //create one.
-    //no cart for user, create new cart
-    await Cart.create({
+    await Order.create({
       userId,
       orderTime,
       orderType,
       orderPrice
     });
+
+    //remove cart
+    await Cart.findOneAndUpdate({ userId }, { products: [] });
+    //add 1 to bought soups at user.
+    const user = await User.findOne({ userId });
+    //set order to active.
+    console.log(user);
+
     return res.json({ order });
   } catch (err) {
     res.json({ err });
