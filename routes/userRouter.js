@@ -5,7 +5,7 @@ const auth = require('../middleware/auth');
 const User = require('../models/userModel');
 const Cart = require('../models/cartModel');
 const Order = require('../models/orderModel');
-const { findById } = require('../models/userModel');
+
 // get
 router.get('/getall', async (req, res) => {
   const users = await User.find({});
@@ -22,6 +22,15 @@ router.get('/getCart', auth, async (req, res) => {
     let cart = await Cart.find({ userId });
     res.json({ cart });
     return res.json(true);
+  } catch (err) {
+    res.json({ err });
+  }
+});
+router.get('/getOrders', auth, async (req, res) => {
+  try {
+    const orders = await Order.find();
+    console.log(orders);
+    return res.json({ orders });
   } catch (err) {
     res.json({ err });
   }
@@ -50,6 +59,7 @@ router.get('/getUserInformation', auth, async (req, res) => {
 router.get('/', auth, async (req, res) => {
   const user = await User.findById(req.user);
   res.json({
+    ROLE: user.ROLE,
     displayName: user.displayName,
     id: user._id
   });
@@ -124,10 +134,11 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ msg: 'invalid login credentials' });
     }
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-
+    console.log(user);
     res.json({
       token,
       user: {
+        ROLE: user.ROLE,
         id: user._id,
         displayName: user.displayName
       }
@@ -251,9 +262,9 @@ router.post('/removeFromCart', auth, async (req, res) => {
   }
 });
 
-router.post('/order', async (req, res) => {
+router.put('/order', async (req, res) => {
   const { userId, orderType, orderTime, orderPrice } = req.body;
-
+  console.log(userId);
   try {
     await Order.create({
       userId,
@@ -265,9 +276,12 @@ router.post('/order', async (req, res) => {
     //remove cart
     await Cart.findOneAndUpdate({ userId }, { products: [] });
     //add 1 to bought soups at user.
-    const user = await User.findOne({ userId });
+    const user = await User.findOneAndUpdate(
+      { _id: userId },
+      { $inc: { boughtSoups: 1 } },
+      { new: true }
+    );
     //set order to active.
-    console.log(user);
 
     return res.json({ order });
   } catch (err) {

@@ -5,6 +5,7 @@ const orderSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   },
+  active: { type: Boolean, default: true },
   orderType: { type: String },
   orderTime: { type: String },
   orderPrice: { type: String },
