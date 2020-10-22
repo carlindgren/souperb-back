@@ -262,26 +262,30 @@ router.post('/removeFromCart', auth, async (req, res) => {
   }
 });
 
-router.put('/order', async (req, res) => {
+router.put('/order', auth, async (req, res) => {
   const { userId, orderType, orderTime, orderPrice } = req.body;
-  console.log(userId);
+  //what to do????
+  //if user has an active order. do not create new one
   try {
-    await Order.create({
-      userId,
-      orderTime,
-      orderType,
-      orderPrice
-    });
-
-    //remove cart
-    await Cart.findOneAndUpdate({ userId }, { products: [] });
-    //add 1 to bought soups at user.
-    const user = await User.findOneAndUpdate(
-      { _id: userId },
-      { $inc: { boughtSoups: 1 } },
-      { new: true }
-    );
-    //set order to active.
+    const order = await Order.findOne({ userId, active: true });
+    if (!order) {
+      await Order.create({
+        userId,
+        orderTime,
+        orderType,
+        orderPrice
+      });
+      await Cart.findOneAndUpdate({ userId }, { products: [] });
+      //add 1 to bought soups at user.
+      const user = await User.findOneAndUpdate(
+        { _id: userId },
+        { $inc: { boughtSoups: 1 } },
+        { new: true }
+      );
+    }
+    if (order) {
+      return res.json({ msg: 'You already have an active order' });
+    }
 
     return res.json({ order });
   } catch (err) {
