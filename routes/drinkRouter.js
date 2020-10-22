@@ -4,9 +4,9 @@ const Drink = require('../models/drinkModel');
 router.get('/getall', async (req, res) => {
   const drinks = await Drink.find({});
   if (!drinks) {
-    res.status(400).json({ msg: 'no soups in db' });
+    return res.status(400).json({ msg: 'no soups in db' });
   }
-  res.json(drinks);
+  return res.json(drinks);
 });
 
 router.post('/add', async (req, res) => {
@@ -34,9 +34,9 @@ router.post('/add', async (req, res) => {
     });
 
     const savedDrink = await newDrink.save();
-    res.json(savedDrink);
+    return res.json(savedDrink);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 });
 

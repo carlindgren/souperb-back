@@ -10,9 +10,9 @@ const Order = require('../models/orderModel');
 router.get('/getall', async (req, res) => {
   const users = await User.find({});
   if (!users) {
-    res.status(400).json({ msg: 'no users in db' });
+    return res.status(400).json({ msg: 'no users in db' });
   }
-  res.json(users);
+  return res.json(users);
 });
 
 router.get('/getCart', auth, async (req, res) => {
@@ -20,19 +20,19 @@ router.get('/getCart', auth, async (req, res) => {
   const { _id: userId } = user;
   try {
     let cart = await Cart.find({ userId });
-    res.json({ cart });
-    return res.json(true);
+
+    return res.status(200).json({ cart });
   } catch (err) {
-    res.json({ err });
+    return res.json({ err });
   }
 });
 router.get('/getOrders', auth, async (req, res) => {
   try {
     const orders = await Order.find();
-    console.log(orders);
+
     return res.json({ orders });
   } catch (err) {
-    res.json({ err });
+    return res.json({ err });
   }
 });
 
@@ -43,22 +43,22 @@ router.get('/getOrderInformation', auth, async (req, res) => {
   try {
     let order = await Order.find({ userId });
     if (order) {
-      res.json({ order });
-      return res.json(true);
+      return res.status(200).json({ order });
     }
     return res.json({ msg: 'no orderDetails for this account' });
   } catch (err) {
-    res.json({ err });
+    return res.json({ err });
   }
 });
 
 router.get('/getUserInformation', auth, async (req, res) => {
   const user = await User.findById(req.user);
-  res.json({ user });
+
+  return res.json({ user });
 });
 router.get('/', auth, async (req, res) => {
   const user = await User.findById(req.user);
-  res.json({
+  return res.json({
     ROLE: user.ROLE,
     displayName: user.displayName,
     id: user._id
@@ -106,9 +106,9 @@ router.post('/register', async (req, res) => {
     });
 
     const savedUser = await newUser.save();
-    res.json(savedUser);
+    return res.status(200).json({ savedUser });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 });
 
@@ -134,8 +134,8 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ msg: 'invalid login credentials' });
     }
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-    console.log(user);
-    res.json({
+
+    return res.json({
       token,
       user: {
         ROLE: user.ROLE,
@@ -145,7 +145,7 @@ router.post('/login', async (req, res) => {
     });
   } catch {
     if (err) {
-      res.status(500).json({ msg: err.message });
+      return res.status(500).json({ msg: err.message });
     }
   }
 });
@@ -159,7 +159,7 @@ router.post('/addPreferedPayment', auth, async (req, res) => {
     );
     return res.json(true);
   } catch (err) {
-    res.json({ msg: err.message });
+    return res.json({ msg: err.message });
   }
 });
 router.post('/addAdressDetails', auth, async (req, res) => {
@@ -180,7 +180,7 @@ router.post('/addAdressDetails', auth, async (req, res) => {
     );
     return res.json(true);
   } catch (err) {
-    res.status(500).json({ msg: err.message });
+    return res.status(500).json({ msg: err.message });
   }
 });
 
@@ -200,7 +200,7 @@ router.post('/tokenIsValid', async (req, res) => {
     }
     return res.json(true);
   } catch (err) {
-    res.status(500).json({ msg: err.message });
+    return res.status(500).json({ msg: err.message });
   }
 });
 router.post('/deleteCartItem', auth, async (req, res) => {
@@ -220,9 +220,9 @@ router.post('/deleteCartItem', auth, async (req, res) => {
       products: newProds
     });
     newCart.save();
-    res.json({ cart });
+    return res.status(200).json({ cart });
   } catch (err) {
-    res.json({ msg: err.message });
+    return res.status(500).json({ msg: err.message });
   }
 });
 
@@ -246,7 +246,7 @@ router.post('/removeFromCart', auth, async (req, res) => {
         cart.products.push({ productId, quantity, name, price, typeOfProd });
       }
       cart = await cart.save();
-      return res.status(201).send(cart);
+      return res.status(201).json({ cart });
     } else {
       //no cart for user, create new cart
       const newCart = await Cart.create({
@@ -254,11 +254,10 @@ router.post('/removeFromCart', auth, async (req, res) => {
         products: [{ productId, quantity, name, price, typeOfProd }]
       });
 
-      return res.status(201).send(newCart);
+      return res.status(201).json({ newCart });
     }
   } catch (err) {
-    console.log(err);
-    res.status(500).send({ msg: err.message });
+    return res.status(500).send({ msg: err.message });
   }
 });
 
@@ -287,9 +286,9 @@ router.put('/order', auth, async (req, res) => {
       return res.json({ msg: 'You already have an active order' });
     }
 
-    return res.json({ order });
+    return res.status(200).json({ order });
   } catch (err) {
-    res.json({ err });
+    return res.status(500).json({ err });
   }
 });
 router.post('/cart', auth, async (req, res) => {
@@ -312,7 +311,7 @@ router.post('/cart', auth, async (req, res) => {
         cart.products.push({ productId, quantity, name, price, typeOfProd });
       }
       cart = await cart.save();
-      return res.status(201).send(cart);
+      return res.status(201).json({ cart });
     } else {
       //no cart for user, create new cart
       const newCart = await Cart.create({
@@ -320,11 +319,10 @@ router.post('/cart', auth, async (req, res) => {
         products: [{ productId, quantity, name, price, typeOfProd }]
       });
 
-      return res.status(201).send(newCart);
+      return res.status(201).json({ newCart });
     }
   } catch (err) {
-    console.log(err);
-    res.status(500).send({ msg: err.message });
+    return res.status(500).json({ msg: err.message });
   }
 });
 
@@ -333,18 +331,17 @@ router.delete('/deleteCart', auth, async (req, res) => {
   const { userId } = req.body;
   try {
     const deleted = await Cart.findOneAndDelete({ userId });
-    return res.json(true);
+    return res.status(200).json({ deleted });
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ msg: err.message });
+    return res.status(500).json({ msg: err.message });
   }
 });
 router.delete('/delete', auth, async (req, res) => {
   try {
     const deletedUser = await User.findByIdAndDelete(req.user);
-    res.json(deletedUser);
+    return res.json(deletedUser);
   } catch (err) {
-    res.status(400).json({ msg: err.message });
+    return res.status(400).json({ msg: err.message });
   }
 });
 module.exports = router;

@@ -4,9 +4,9 @@ const Soup = require('../models/soupModel');
 router.get('/getall', async (req, res) => {
   const soups = await Soup.find({});
   if (!soups) {
-    res.status(400).json({ msg: 'no soups in db' });
+    return res.status(400).json({ msg: 'no soups in db' });
   }
-  res.json(soups);
+  return res.json(soups);
 });
 
 router.post('/add', async (req, res) => {
@@ -33,9 +33,9 @@ router.post('/add', async (req, res) => {
     });
 
     const savedSoup = await newSoup.save();
-    res.json(savedSoup);
+    return res.json(savedSoup);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 });
 module.exports = router;

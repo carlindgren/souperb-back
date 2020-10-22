@@ -4,9 +4,9 @@ const Bread = require('../models/breadModel');
 router.get('/getall', async (req, res) => {
   const breads = await Bread.find({});
   if (!breads) {
-    res.status(400).json({ msg: 'no soups in db' });
+    return res.status(400).json({ msg: 'no soups in db' });
   }
-  res.json(breads);
+  return res.json(breads);
 });
 
 router.post('/add', async (req, res) => {
@@ -34,9 +34,9 @@ router.post('/add', async (req, res) => {
     });
 
     const savedBread = await newBread.save();
-    res.json(savedBread);
+    return res.json(savedBread);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 });
 
