@@ -262,7 +262,18 @@ router.post('/removeFromCart', auth, async (req, res) => {
 });
 
 router.put('/order', auth, async (req, res) => {
-  const { userId, orderType, orderTime, orderPrice } = req.body;
+  const {
+    userId,
+    orderType,
+    orderTime,
+    orderPrice,
+    phoneNumber,
+    portCode,
+    floor,
+    street,
+    latlng,
+    name
+  } = req.body;
   //what to do????
   //if user has an active order. do not create new one
   try {
@@ -272,7 +283,15 @@ router.put('/order', auth, async (req, res) => {
         userId,
         orderTime,
         orderType,
-        orderPrice
+        orderPrice,
+        deliveryDetails: {
+          phoneNo: phoneNumber,
+          port: portCode,
+          floor,
+          street,
+          latlng,
+          name
+        }
       });
       await Cart.findOneAndUpdate({ userId }, { products: [] });
       //add 1 to bought soups at user.
