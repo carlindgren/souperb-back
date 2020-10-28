@@ -272,7 +272,8 @@ router.put('/order', auth, async (req, res) => {
     floor,
     street,
     latlng,
-    name
+    name,
+    cartItems
   } = req.body;
   //what to do????
   //if user has an active order. do not create new one
@@ -291,7 +292,8 @@ router.put('/order', auth, async (req, res) => {
           street,
           latlng,
           name
-        }
+        },
+        cartItems
       });
       await Cart.findOneAndUpdate({ userId }, { products: [] });
       //add 1 to bought soups at user.

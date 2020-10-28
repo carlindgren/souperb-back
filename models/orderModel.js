@@ -14,6 +14,7 @@ const orderSchema = new mongoose.Schema({
     latlng: [{ type: Number }],
     name: { type: String }
   },
+  cartItems: [{}],
   active: { type: Boolean, default: true },
   orderType: { type: String }, //delivery or takeAway
   orderTime: { type: String }, //when to pickup or when wanting order
