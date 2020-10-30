@@ -8,7 +8,7 @@ const orderSchema = new mongoose.Schema({
   },
   deliveryDetails: {
     phoneNo: { type: Number },
-    port: {},
+    portCode: { type: Number || String },
     floor: { type: Number },
     street: { type: String },
     latlng: [{ type: Number }],
@@ -19,7 +19,8 @@ const orderSchema = new mongoose.Schema({
   orderType: { type: String }, //delivery or takeAway
   orderTime: { type: String }, //when to pickup or when wanting order
   orderPrice: { type: String }, //Price of the order
-  orderNo: { type: Number } //
+  orderNo: { type: Number },
+  deploymentReady: { type: Boolean, default: false }
 });
 
 module.exports = mongoose.model('Order', orderSchema);

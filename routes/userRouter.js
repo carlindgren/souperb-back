@@ -261,13 +261,28 @@ router.post('/removeFromCart', auth, async (req, res) => {
   }
 });
 
+router.post('/markFinished', auth, async (req, res) => {
+  try {
+    const { orderId } = req.body;
+    const order = await Order.findByIdAndUpdate(
+      { _id: orderId },
+      { deploymentReady: true }
+    );
+
+    await order.save();
+    return res.status(201);
+  } catch (err) {
+    return res.status(500).send({ msg: err.message });
+  }
+});
+
 router.put('/order', auth, async (req, res) => {
   const {
     userId,
     orderType,
     orderTime,
     orderPrice,
-    phoneNumber,
+    phoneNo: phoneNumber,
     portCode,
     floor,
     street,
@@ -287,7 +302,7 @@ router.put('/order', auth, async (req, res) => {
         orderPrice,
         deliveryDetails: {
           phoneNo: phoneNumber,
-          port: portCode,
+          portCode,
           floor,
           street,
           latlng,
